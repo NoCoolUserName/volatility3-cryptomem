@@ -1,0 +1,46 @@
+# Attribution and scope
+
+CryptoMem is an independently maintained implementation by NoCoolUserName,
+published under the Volatility Software License 1.0. The source for each release
+is available at https://github.com/NoCoolUserName/volatility3-cryptomem.
+
+## CryptoScan reference
+
+[BoB10th-BTC/CryptoScan](https://github.com/BoB10th-BTC/CryptoScan), reviewed at
+commit `9588ff800ba625f7ef044ddb98a23013810fbf29`, supplied the initial research
+direction: cryptocurrency text artifacts in Windows process memory. Its main
+source credits MoonGyu Lee and JeongYoon Kang and carries a Volatility Foundation
+VSL-1.0 notice. CryptoMem does not bundle or execute that implementation, wordlist,
+artwork, reports, network-enrichment code, or dependencies. No upstream regex or
+implementation source was copied. Inspiration is not endorsement or feature parity.
+
+## Format specifications and public test vectors
+
+- [BIP-173](https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki):
+  Pieter Wuille and Greg Maxwell, 2017, BSD-2-Clause.
+- [BIP-350](https://github.com/bitcoin/bips/blob/master/bip-0350.mediawiki):
+  Pieter Wuille, 2020, BSD-2-Clause. Published valid/invalid address vectors are
+  used in tests. Protocol constants and validation rules follow these documents;
+  reference-implementation code was not copied.
+- [BIP-321](https://github.com/bitcoin/bips/blob/master/bip-0321.mediawiki):
+  Matt Corallo, 2024, BSD-2-Clause. Only the documented direct-address subset is
+  interpreted; no full payment-handler implementation is claimed.
+- [ERC-55](https://eips.ethereum.org/EIPS/eip-55): Vitalik Buterin and Alex Van
+  de Sande, 2016, CC0. Public address examples and checksum specification.
+- [ERC-681](https://eips.ethereum.org/EIPS/eip-681): Daniel A. Nagy, 2017, CC0.
+  Direct-address request syntax; contract calls and ENS resolution are unsupported.
+- [XRPL classic address documentation](https://xrpl.org/docs/concepts/accounts/addresses)
+  and protocol Base58 alphabet/payload definitions. Protocol rules informed an
+  original validator; no XRPL library implementation is bundled.
+
+The BSD-2-Clause terms for retained Bitcoin specification/test-vector material
+are included in LICENSE along with the author attribution above. CC0 material:
+https://creativecommons.org/publicdomain/zero/1.0/.
+
+## Runtime dependencies
+
+Volatility 3 2.28.2 retains its upstream VSL and notices. PyCryptodome 3.23.0
+supplies Keccak (Ethereum uses Keccak-256, not SHA3-256); it retains its own public
+domain/BSD notices. The standalone repository distributes neither dependency's
+binaries. `requirements.txt` pins the tested runtime. Retain the exact dependency
+licenses if redistributing an environment or binary bundle.
