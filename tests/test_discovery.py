@@ -27,15 +27,21 @@ print(json.dumps({'names': sorted(framework.list_plugins()), 'failures': failure
             return json.loads(result.stdout)
         before, after = catalog(), catalog(str(ROOT / 'plugins'))
         self.assertEqual(set(after['names']) - set(before['names']),
-                         {'windows.cryptomem.CryptoMem'})
+                         {'windows.cryptomem.CryptoMem', 'linux.cryptomem.CryptoMem'})
         self.assertTrue(set(before['names']) <= set(after['names']))
         self.assertEqual(set(before['failures']), set(after['failures']))
         self.assertIn('windows.pslist.PsList', after['names'])
+        self.assertIn('linux.pslist.PsList', after['names'])
 
     def test_cli_help_and_corrupt_input_do_not_need_mcp(self):
+        for os_name in ('windows', 'linux'):
+            with self.subTest(os=os_name):
+                self.check_cli(os_name)
+
+    def check_cli(self, os_name):
         command = [sys.executable, '-I', '-c', 'import sys; sys.argv[0] = "vol"; from volatility3.cli import main; main()',
                    '--offline', '-p', str(ROOT / 'plugins')]
-        help_result = subprocess.run(command + ['windows.cryptomem.CryptoMem', '--pid', '42', '-h'],
+        help_result = subprocess.run(command + [f'{os_name}.cryptomem.CryptoMem', '--pid', '42', '-h'],
                                      capture_output=True, text=True, timeout=60)
         self.assertEqual(help_result.returncode, 0, help_result.stderr)
         self.assertIn('--pid', help_result.stdout)
@@ -51,7 +57,7 @@ print(json.dumps({'names': sorted(framework.list_plugins()), 'failures': failure
             (root / 'cache').mkdir()
             result = subprocess.run(command + ['--cache-path', str(root / 'cache'),
                 '-f', str(image), '-o', str(output), '-r', 'json',
-                'windows.cryptomem.CryptoMem', '--pid', '42'],
+                f'{os_name}.cryptomem.CryptoMem', '--pid', '42'],
                 capture_output=True, text=True, timeout=60)
             self.assertNotEqual(result.returncode, 0)
             self.assertIn('Unsatisfied requirement', result.stdout + result.stderr)

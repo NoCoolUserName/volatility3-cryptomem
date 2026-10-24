@@ -1,3 +1,39 @@
+# Linux adapter validation — 0.3.0
+
+Local target: Python 3.12.13, Volatility 3 2.28.2, PyCryptodome 3.23.0,
+pefile 2024.8.26, macOS ARM64 analysis host. Linux guest scope is x86-64 only;
+Intel32, ARM and other Linux architectures are unsupported until tested.
+
+The 76-test standalone suite passes, including the existing Windows/format/Monero
+regressions and 11 Linux tests. Synthetic byte buffers use real Volatility layers,
+requirements, discovery and JSON rendering; task/VMA enumeration and the comm array
+wrapper are simulated. Discovery retains native Linux and Windows catalogs. Both
+actual CLI commands reject a corrupt synthetic image with unsatisfied requirements
+and unchanged input. Symbol-error injection verifies explicit incomplete coverage.
+Tests cover all four currencies across ASCII/UTF-16LE read boundaries, exact virtual
+offsets, exclusive VMA ends, separated/adjacent mappings, unreadable gaps, partial
+artifacts, empty results, invalid arguments, task/mapping/byte/result limits,
+TGID/TID semantics, kernel threads, missing layers and interruption.
+
+The inspected APIs are from the installed pinned Volatility source:
+`linux.pslist.PsList.list_tasks` (4.1.1), `task_struct.add_process_layer`,
+`task_struct.is_kernel_thread` and `mm_struct.get_vma_iter`. The latter dispatches
+between mmap and maple-tree traversal and may skip invalid entries. Synthetic
+adapters do not validate either traversal against an acquired kernel.
+
+Real-memory Linux validation remains outstanding. The Volatility Foundation
+[public sample index](https://github.com/volatilityfoundation/volatility/wiki/Memory-Samples)
+and [Linux tutorial](https://volatility3.readthedocs.io/en/stable/getting-started-linux-tutorial.html)
+were inspected on 2026-10-24; no suitable Linux x86-64 acquisition with verified
+licensing and matching symbols was established for this run. No sample was
+uploaded, recovered endpoint contacted, or recovered code executed. Future checks
+need authorized positive/negative acquisitions, matching kernel ISFs, known address
+locations and per-run coverage. Public availability alone is not a license check.
+MCP timeout/cancellation and installed-profile checks belong to volatility-mcp's
+integration validation; standalone tests do not substitute for those checks.
+
+---
+
 # Validation scope
 
 CryptoMem currently has **synthetic and format-vector validation**, not validated
