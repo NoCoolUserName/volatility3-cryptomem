@@ -1,7 +1,7 @@
 """Bounded, offline address and direct payment-request recognition.
 
 Original implementation of the format definitions in BIP-173/350, ERC-55/681,
-BIP-321's direct-address subset, and the XRPL classic-address specification.
+BIP-321's direct-address subset, XRPL classic addresses, and Monero addresses.
 No CryptoScan source or reference-implementation code is copied here. Constants
 are protocol constants. See THIRD_PARTY_NOTICES.md for specifications and credits.
 Matches establish text/format evidence, never ownership, balances, or a payment.
@@ -20,11 +20,21 @@ _XRP_ALPHABET = "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz"
 _BECH_ALPHABET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
 _BECH_GENERATORS = (0x3B6A57B2, 0x26508E6D, 0x1EA119FA, 0x3D4233DD, 0x2A1462B3)
 _BASE58_CHARS = "1-9A-HJ-NP-Za-km-z"
+# Prefix bytes identify an address type/network; they do not prove chain use.
+_XMR_PREFIXES = {
+    18: ("standard", "mainnet", 69), 19: ("integrated", "mainnet", 77),
+    42: ("subaddress", "mainnet", 69),
+    53: ("standard", "testnet", 69), 54: ("integrated", "testnet", 77),
+    63: ("subaddress", "testnet", 69),
+    24: ("standard", "stagenet", 69), 25: ("integrated", "stagenet", 77),
+    36: ("subaddress", "stagenet", 69),
+}
 _ADDRESS = (
     r"(?i:bc1|tb1)[A-Za-z0-9]{6,87}"
     r"|0x[0-9a-fA-F]{40}"
     rf"|[13mn2][{_BASE58_CHARS}]{{25,34}}"
     rf"|r[{_BASE58_CHARS}]{{24,34}}"
+    rf"|[45789AB][{_BASE58_CHARS}]{{105}}|[45789AB][{_BASE58_CHARS}]{{94}}"
 )
 _ADDRESS_RE = re.compile(rf"(?<![A-Za-z0-9_])(?:{_ADDRESS})(?![A-Za-z0-9_])")
 _URI_CHAR = r"[^\x00-\x20\x7f-\xff<>\"'\\]"
@@ -123,17 +133,58 @@ def _keccak_module():
     try:
         from Crypto.Hash import keccak
     except ImportError as exc:
-        raise ImportError("CryptoMem Ethereum checksum validation requires pycryptodome==3.23.0") from exc
+        raise ImportError("CryptoMem Ethereum/Monero checksum validation requires pycryptodome==3.23.0") from exc
     return keccak
 
 
 def check_dependencies(currencies: set[str]) -> None:
     """Fail clearly before scanning when selected validation is unavailable."""
-    if "ETH" in currencies:
+    if currencies & {"ETH", "XMR"}:
         _keccak_module()
 
 
+def _xmr_result(value: str) -> dict[str, str]:
+    result = {"currency": "XMR", "canonical": value, "format": "Monero-Base58", "network": "unspecified"}
+    if len(value) not in (95, 106) or any(char not in _BTC_ALPHABET for char in value):
+        return result | {"validation": "malformed", "reason": "Invalid Monero alphabet or encoded length"}
+    # Monero encodes each 8-byte block separately as 11 padded characters.
+    # Both supported payload sizes end in a 5-byte block (7 characters).
+    raw = bytearray()
+    for start in range(0, len(value), 11):
+        block = value[start:start + 11]
+        number = 0
+        for char in block:
+            number = number * 58 + _BTC_ALPHABET.index(char)
+        size = 8 if len(block) == 11 else 5
+        if number >= 1 << (8 * size):
+            return result | {"validation": "malformed", "reason": "Monero Base58 block overflow"}
+        raw.extend(number.to_bytes(size, "big"))
+    prefix = _XMR_PREFIXES.get(raw[0])
+    if prefix is None or len(raw) != prefix[2]:
+        return result | {"validation": "malformed", "reason": "Unsupported Monero prefix or address-type payload length"}
+    kind, network, _ = prefix
+    result.update(format="Monero-" + kind, network="monero-" + network + "-compatible")
+    digest = _keccak_module().new(digest_bits=256, data=bytes(raw[:-4])).digest()
+    valid = digest[:4] == raw[-4:]
+    return result | {
+        "validation": "checksum_valid" if valid else "checksum_invalid",
+        "reason": ("Block encoding, address-type/network prefix, length and Keccak checksum validated; "
+                   "public-key curve validity and wallet ownership are not checked") if valid
+                  else "Monero Keccak checksum mismatch",
+    }
+
+
+def _address_currency(value: str) -> str:
+    if value.startswith("0x"):
+        return "ETH"
+    if len(value) in (95, 106):
+        return "XMR"
+    return "XRP" if value.startswith("r") else "BTC"
+
+
 def _address_result(value: str) -> dict[str, str]:
+    if _address_currency(value) == "XMR":
+        return _xmr_result(value)
     if value.startswith("0x"):
         return _eth_result(value)
     if value.lower().startswith(("bc1", "tb1")):
@@ -206,9 +257,9 @@ def _payment_result(value: str) -> dict[str, str]:
         result["network"] = "declared-chain-id:" + chain
     if not _ADDRESS_RE.fullmatch(target):
         return result | {"reason": "Missing or unsupported direct address; names are never resolved"}
-    address = _address_result(target)
-    if address["currency"] != currency:
+    if _address_currency(target) != currency:
         return result | {"validation": "malformed", "reason": "Address does not match URI scheme"}
+    address = _address_result(target)
     result["canonical"] = address["canonical"]
     if btc:
         result["network"] = address["network"]
@@ -252,14 +303,14 @@ def _text_artifacts(text: str, base: int, width: int, currencies: set[str]) -> I
                 yield _record(result, value, offset, width, "payment_request", "payment_request")
             for address_match in _ADDRESS_RE.finditer(value):
                 address = address_match.group()
-                currency = "ETH" if address.startswith("0x") else ("XRP" if address.startswith("r") else "BTC")
+                currency = _address_currency(address)
                 if currency not in currencies:
                     continue
                 result = _address_result(address)
                 yield _record(result, address, offset + address_match.start() * width, width, "address", "payment_request_text")
         else:
             # A filter must not trigger an optional dependency for another currency.
-            currency = "ETH" if value.startswith("0x") else ("XRP" if value.startswith("r") else "BTC")
+            currency = _address_currency(value)
             if currency not in currencies:
                 continue
             result = _address_result(value)
@@ -278,8 +329,8 @@ def find_artifacts(data: bytes, currencies: set[str]) -> Iterator[dict]:
     """
     if not isinstance(data, bytes) or len(data) > MAX_BUFFER_BYTES:
         raise ValueError("CryptoMem detector requires bytes in buffers no larger than 4 MiB")
-    if not isinstance(currencies, set) or currencies - {"BTC", "ETH", "XRP"}:
-        raise ValueError("currencies must be a set containing only BTC, ETH, XRP")
+    if not isinstance(currencies, set) or currencies - {"BTC", "ETH", "XRP", "XMR"}:
+        raise ValueError("currencies must be a set containing only BTC, ETH, XRP, XMR")
     if not currencies:
         return
     yield from _text_artifacts(data.decode("latin-1"), 0, 1, currencies)

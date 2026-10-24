@@ -12,6 +12,8 @@ No MCP, Workbench, AI service, wallet application, or blockchain API is required
 - Bitcoin legacy Base58Check and native Bech32/Bech32m address candidates.
 - Ethereum-style hexadecimal address candidates; ERC-55 checksum validation.
 - XRP classic address candidates with alphabet, payload, and checksum checks.
+- Monero standard addresses, subaddresses and integrated addresses: block Base58,
+  type/length, mainnet/testnet/stagenet prefix and Keccak-256 checksum checks.
 - ASCII and UTF-16LE strings, including matches crossing read-chunk boundaries.
 - A bounded subset of direct-address `bitcoin:` and `ethereum:` payment requests.
 
@@ -52,7 +54,7 @@ use the same plugin.
 | Option | Meaning |
 | --- | --- |
 | `--pid` | One required positive process ID. |
-| `--currency` | `all` (default), `btc`, `eth`, or `xrp`. |
+| `--currency` | `all` (default), `btc`, `eth`, `xrp`, or `xmr`. |
 | `--max-scan-bytes` | Default 67,108,864; maximum 268,435,456 bytes. |
 | `--max-results` | Default 1,000; maximum 10,000 findings. |
 
@@ -65,6 +67,17 @@ the implemented format checks; it does not verify activity or ownership.
 Checksum-invalid candidates remain distinguishable from unchecked formats.
 Amounts in payment requests remain strings; they are requested values, not
 balances or observed transfers. Unsupported URI features are explicitly labeled.
+
+CryptoMem 0.2.0 includes Monero in `all`; use `--currency xmr` for Monero alone.
+`Format` distinguishes `Monero-standard`, `Monero-subaddress` and
+`Monero-integrated`. Prefix-derived network labels end in `-compatible` and do
+not prove blockchain activity. Validation checks encoding and checksum, not
+elliptic-curve public-key validity. It preserves the complete integrated address
+without separately extracting its payment ID. Literal addresses inside `monero:`
+text can be found, but Monero URI amounts/options are not interpreted. Seeds,
+keys, wallet files, mining configuration and transaction hashes are outside this
+detector's scope. Ethereum and Monero reuse the existing pinned PyCryptodome
+dependency; no new runtime dependency is added.
 
 The plugin saves `cryptomem-findings.jsonl` as findings are emitted and a
 `cryptomem-scan-summary.json` coverage artifact through Volatility's output handler.

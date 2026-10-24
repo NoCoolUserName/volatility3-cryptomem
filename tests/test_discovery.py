@@ -40,6 +40,7 @@ print(json.dumps({'names': sorted(framework.list_plugins()), 'failures': failure
         self.assertEqual(help_result.returncode, 0, help_result.stderr)
         self.assertIn('--pid', help_result.stdout)
         self.assertIn('--max-scan-bytes', help_result.stdout)
+        self.assertIn('xmr', help_result.stdout)
         self.assertNotIn('--api-key', help_result.stdout)
         with tempfile.TemporaryDirectory(prefix='cryptomem-invalid-') as temporary:
             root = Path(temporary)

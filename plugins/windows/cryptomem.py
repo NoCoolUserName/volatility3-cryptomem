@@ -25,7 +25,7 @@ class CryptoMem(interfaces.plugins.PluginInterface):
     """
 
     _required_framework_version = (2, 28, 0)
-    _version = (0, 1, 0)
+    _version = (0, 2, 0)
     CHUNK_BYTES = 65536
     MAX_SCAN_BYTES = 268435456
     MAX_RESULTS = 10000
@@ -48,7 +48,7 @@ class CryptoMem(interfaces.plugins.PluginInterface):
             ),
             requirements.ChoiceRequirement(
                 name="currency", description="Address families to scan",
-                choices=["all", "btc", "eth", "xrp"], default="all", optional=True,
+                choices=["all", "btc", "eth", "xrp", "xmr"], default="all", optional=True,
             ),
             requirements.IntRequirement(
                 name="max_scan_bytes",
@@ -69,8 +69,8 @@ class CryptoMem(interfaces.plugins.PluginInterface):
             value = self.config[name]
             if type(value) is not int or not 1 <= value <= maximum:
                 raise ValueError(f"{name} must be an integer from 1 to {maximum}")
-        if self.config["currency"] not in {"all", "btc", "eth", "xrp"}:
-            raise ValueError("currency must be one of: all, btc, eth, xrp")
+        if self.config["currency"] not in {"all", "btc", "eth", "xrp", "xmr"}:
+            raise ValueError("currency must be one of: all, btc, eth, xrp, xmr")
 
     def _process(self):
         # Enumerate without a filter so the traversal cap applies to nonmatching
@@ -123,7 +123,7 @@ class CryptoMem(interfaces.plugins.PluginInterface):
                 "lookahead or a VAD end; unreadable chunks are not zero padded."
             ),
         }
-        currencies = ({"BTC", "ETH", "XRP"} if self.config["currency"] == "all"
+        currencies = ({"BTC", "ETH", "XRP", "XMR"} if self.config["currency"] == "all"
                       else {self.config["currency"].upper()})
         try:
             formats.check_dependencies(currencies)
