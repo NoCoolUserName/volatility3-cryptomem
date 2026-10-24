@@ -39,8 +39,18 @@ https://creativecommons.org/publicdomain/zero/1.0/.
 
 ## Runtime dependencies
 
+Monero address format references: [standard addresses](https://docs.getmonero.org/public-address/standard-address/),
+[subaddresses](https://docs.getmonero.org/public-address/subaddress/),
+[integrated addresses](https://docs.getmonero.org/public-address/integrated-address/),
+and [block Base58](https://docs.getmonero.org/cryptography/base58/).
+The public standard/integrated examples used in tests come from Monero Docs,
+copyright Monero Community, under MIT; their terms are retained in LICENSE.
+Network/type constants were checked against
+[Monero's configuration](https://github.com/monero-project/monero/blob/master/src/cryptonote_config.h).
+The decoder is an original implementation; no Monero implementation code is copied.
+
 Volatility 3 2.28.2 retains its upstream VSL and notices. PyCryptodome 3.23.0
-supplies Keccak (Ethereum uses Keccak-256, not SHA3-256); it retains its own public
+supplies Keccak (Ethereum and Monero use Keccak-256, not SHA3-256); it retains its own public
 domain/BSD notices. The standalone repository distributes neither dependency's
 binaries. `requirements.txt` pins the tested runtime. Retain the exact dependency
 licenses if redistributing an environment or binary bundle.
