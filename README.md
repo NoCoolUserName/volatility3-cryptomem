@@ -11,6 +11,9 @@ No MCP, Workbench, AI service, wallet application, or blockchain API is required
 - Windows Intel32/Intel64 process memory with matching local Volatility symbols.
 - Linux x86-64 (Intel64) process memory; other Linux architectures are unsupported
   until tested. This is memory-image analysis, not Linux desktop packaging.
+- Experimental legacy macOS x86-64 (Intel64) process memory with exact matching
+  Darwin kernel symbols. Intel32, Apple silicon/ARM64 and modern macOS builds are
+  unsupported until separately implemented and validated.
 - Bitcoin legacy Base58Check and native Bech32/Bech32m address candidates.
 - Ethereum-style hexadecimal address candidates; ERC-55 checksum validation.
 - XRP classic address candidates with alphabet, payload, and checksum checks.
@@ -55,6 +58,21 @@ kernel. Provision a matching ISF before scanning offline; see Volatility's
 [Linux symbols documentation](https://volatility3.readthedocs.io/en/stable/symbol-tables.html).
 Unsatisfied kernel/layer/symbol requirements fail before a scan summary can be
 created; retain CLI stderr and the nonzero exit status. That is not a negative finding.
+
+For a legacy Intel64 macOS capture, select a BSD PID from `mac.pslist.PsList`:
+
+```sh
+.venv/bin/vol --offline -p "$PWD/plugins" -s /symbols/matching-darwin-kernel \
+  -f /evidence/mac.raw -o /case/outputs/cryptomem -r json \
+  mac.cryptomem.CryptoMem --pid 1234 --currency all
+```
+
+The existing Mac symbol pack can be reused **only when its Darwin kernel banner
+matches the capture**; it is not universal Mac coverage. Volatility 3's macOS
+analysis is [no longer actively maintained](https://volatility3.readthedocs.io/en/stable/getting-started-mac-tutorial.html).
+CryptoMem's Mac adapter is experimental and synthetic-tested, not validated against
+an acquired Mac image. Running the analyzer on an Apple-silicon host does not add
+support for Apple-silicon captures. No memory acquisition capability is added.
 
 Create the output directory before running. On Windows, use `.venv\Scripts\python`
 and `.venv\Scripts\vol.exe`, and an absolute path to the `plugins` directory.
@@ -104,10 +122,10 @@ the command exit status and summary together. An interrupted run may have only
 partial artifacts; missing final coverage is not completion.
 
 CryptoMem 0.3.0 adds `linux.cryptomem.CryptoMem`. The Windows command, options,
-row columns and summary keys remain unchanged. Both adapters use the same bounded
+row columns and summary keys remain unchanged. All adapters use the same bounded
 scanner and address validators; the plain shared helpers remain under
 `plugins/windows/cryptomem_scan.py` and `cryptomem_formats.py` to preserve the
-existing installation layout. Install the entire `plugins` tree for either OS.
+existing installation layout. Install the entire `plugins` tree for every OS.
 Linux summary keys use `vma_count` and `completed_vmas` instead of Windows VAD keys.
 
 Linux selects one thread-group leader (`task.tgid == task.pid`) using
@@ -120,7 +138,19 @@ are capped at 65,536 yielded entries; upstream traversal can do additional work,
 so use an external execution timeout. Volatility may omit invalid tasks/VMAs;
 complete means only all **enumerated** mapping bytes, never all possible memory.
 
-Scanning is limited to the selected process's enumerated Windows VAD or Linux VMA ranges. Missing,
+CryptoMem 0.4.0 adds `mac.cryptomem.CryptoMem`, using the existing Mac
+`PsList.list_tasks_tasks()` API to select one BSD process, then its process layer
+and `proc.get_map_iter()` entries. It does not enumerate or scan Mach threads.
+PID zero/kernel_task is rejected. VM-map ends are exclusive; Mac summaries use
+`vma_count` and `completed_vmas`. Declared entry counts must match enumeration.
+Nested VM submaps are currently unsupported: a process containing one fails with
+explicit incomplete coverage before scanning, rather than flattening separate
+child mappings into a false contiguous match. Missing map fields, damaged lists,
+missing layers, unreadable pages and limits also fail explicitly. This limitation
+can affect ordinary processes that use shared-region submaps; symbols alone do
+not resolve it. No supported macOS build matrix is claimed.
+
+Scanning is limited to the selected process's enumerated Windows VAD or Linux/macOS VMA ranges. Missing,
 paged-out, compressed, encrypted, binary, or unenumerated content may contain
 artifacts this scanner cannot recover. Read overlap is not carried across mapping
 boundaries or missing memory. Repeated occurrences preserve distinct offsets;
@@ -130,7 +160,8 @@ repetition is not independent corroboration. No memory timestamps are invented.
 
 [volatility-mcp](https://github.com/NoCoolUserName/volatility-mcp) installs a
 hash-pinned source revision through its optional addon profile, then exposes
-`windows.cryptomem.CryptoMem` and `linux.cryptomem.CryptoMem` through its existing `list_plugins` and `run_plugin`
+`windows.cryptomem.CryptoMem`, `linux.cryptomem.CryptoMem` and
+`mac.cryptomem.CryptoMem` through its existing `list_plugins` and `run_plugin`
 tools. That integration adds process timeouts/cancellation, image hashes, case
 confinement, artifact hashes, and saved-result reuse. These controls belong to
 MCP; direct Volatility users manage host execution limits and acquisition hashes.

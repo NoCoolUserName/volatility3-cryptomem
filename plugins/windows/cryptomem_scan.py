@@ -1,7 +1,7 @@
 """Shared bounded scanner and output helpers; no plugin class or registry.
 
 Kept alongside the original formats module for existing source installations.
-Linux and Windows adapters supply process selection, names and mapping ranges.
+Linux, macOS and Windows adapters supply process selection, names and mapping ranges.
 """
 import json
 from volatility3.framework import exceptions, renderers
