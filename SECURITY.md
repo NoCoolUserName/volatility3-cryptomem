@@ -10,5 +10,13 @@ users should use Volatility `--offline` and provision matching symbols locally.
 MCP integrations retain their own process timeout, cancellation, hashing, and
 case confinement. Direct Volatility CLI users manage those host controls.
 
+Opt-in seed/key findings are masked in renderers, ordinary artifacts and failure
+text. Complete values require `--extract-secrets` and a private regular POSIX
+output handler; use a private case directory and retain local ACL controls.
+Partial extraction can survive timeout/cancellation. The MCP companion blocks
+full extraction from all saved-output readers. See [EXTENDED_FORMATS.md](EXTENDED_FORMATS.md).
+Public test vectors are examples, never wallet-control evidence. Never upload
+recovered secrets or import them into wallet software to validate them.
+
 Report suspected vulnerabilities through GitHub private vulnerability reporting
 when available. Do not attach private evidence or secrets to public issues.

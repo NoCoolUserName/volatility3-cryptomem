@@ -1,3 +1,28 @@
+# CryptoMem 0.5.0 (prerelease)
+
+Adds independently opt-in English BIP-39 checksum validation, Bitcoin WIF and
+BIP-32 xprv/tprv validation, and explicitly ambiguous hexadecimal transaction-ID
+candidates. Existing commands, currency/default address behavior and renderer
+columns remain; richer findings use separate schema-2 files. Recognizable secret
+values are masked across renderers, artifacts and failures. Only explicit
+`--extract-secrets` writes full values via a regular private POSIX output handler.
+The MCP integration must block full extraction from all output-reading routes.
+
+The pinned English word list and public BIP-32 vector add no runtime dependency.
+NFKD and source-span preservation cover supported wide English transcription.
+WIF/extended formats, scalar/version/root checks, field hints, confidence and
+boundaries are documented in EXTENDED_FORMATS.md. No encrypted-wallet recovery,
+other mnemonic schemes/languages, arbitrary binary keys, transaction parsing,
+network enrichment, balance/ownership inference or wallet transactions are added.
+
+Synthetic buffers/public vectors only: Windows/Linux/legacy Intel64 Mac adapters,
+ordinary read boundaries, mappings/gaps, limits, renderers and extraction privacy.
+Real-memory Linux/Mac validation and existing architecture/submap limits remain.
+MCP must pin this source; Workbench requires a subsequent tested backend adoption
+and repackaging to embed it. It does not inherit the plugin update automatically.
+
+---
+
 # CryptoMem 0.4.0 (prerelease)
 
 Adds experimental `mac.cryptomem.CryptoMem` for legacy Intel64 macOS memory

@@ -39,6 +39,15 @@ https://creativecommons.org/publicdomain/zero/1.0/.
 
 ## Runtime dependencies
 
+BIP-39 English word list: Bitcoin BIPs contributors, Marek Palatinus, Pavol
+Rusnak, Aaron Voisine and Sean Bowe, MIT. Pinned revision and digest are recorded
+in EXTENDED_FORMATS.md and the embedded module. BIP-39 public zero-entropy phrase
+and BIP-32 vector 1 are synthetic/public test material. BIP-32: Pieter Wuille,
+BSD-2-Clause (terms retained in LICENSE). WIF rules were checked against Bitcoin
+Core's `src/key_io.cpp`; no wallet implementation code is copied. The original
+validators follow [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki)
+and [BIP-32](https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki).
+
 Monero address format references: [standard addresses](https://docs.getmonero.org/public-address/standard-address/),
 [subaddresses](https://docs.getmonero.org/public-address/subaddress/),
 [integrated addresses](https://docs.getmonero.org/public-address/integrated-address/),
