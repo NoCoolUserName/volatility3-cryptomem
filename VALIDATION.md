@@ -1,3 +1,35 @@
+# Experimental Intel64 macOS adapter validation — 0.4.0
+
+Target: Python 3.12.13, Volatility 3 2.28.2, PyCryptodome 3.23.0, ARM64 macOS host.
+The 88-test standalone suite passes: 12 new Mac tests plus Windows, Linux and
+format regressions. Actual CLI discovery preserves all native plugins and exposes
+all three CryptoMem commands; each fails explicitly on a corrupt synthetic image.
+Synthetic Mac fixtures exercise actual Volatility layers, requirements, renderers,
+shared scanning and output handlers. BSD process enumeration and VM maps are
+simulated, so this does not verify real Darwin page tables or kernel compatibility.
+
+The Mac tests cover exact offsets/provenance/schema, all four currency families
+across ASCII/UTF-16LE read boundaries, adjacent and separated mappings, unreadable
+gaps, empty results, exclusive map ends, duplicate process objects, missing PIDs,
+missing task/map/layer, invalid inputs, corrupt/overlapping maps, byte/result/
+traversal limits, symbol errors, short reads and cooperative interruption.
+Declared map counts detect silent truncation. Nested submaps are rejected before
+scanning, explicitly including the limitation for shared-region submaps in ordinary
+processes. Apple silicon, Intel32 and modern macOS are unsupported.
+
+Volatility's installed Mac PsList 3.0.0, proc extension and map iterator APIs were
+inspected before editing. The bundled public mac.zip has 129 tables; one Intel64
+10.10.5 build14F1912 table was inspected for required proc/map fields. This is
+symbol-schema inspection, not memory-image validation or a tested OS matrix.
+
+**Real-memory macOS validation remains outstanding.** The upstream tutorial links
+an older CTF acquisition, but a suitably licensed, verified image/symbol pair has
+not been established here. No evidence was uploaded and no recovered code run.
+A future validation must include a consented Intel64 image, exact symbols, known
+positive/negative process buffers, independent offset checks and incomplete scans.
+
+---
+
 # Linux adapter validation — 0.3.0
 
 Local target: Python 3.12.13, Volatility 3 2.28.2, PyCryptodome 3.23.0,

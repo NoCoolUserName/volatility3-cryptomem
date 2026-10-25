@@ -27,14 +27,15 @@ print(json.dumps({'names': sorted(framework.list_plugins()), 'failures': failure
             return json.loads(result.stdout)
         before, after = catalog(), catalog(str(ROOT / 'plugins'))
         self.assertEqual(set(after['names']) - set(before['names']),
-                         {'windows.cryptomem.CryptoMem', 'linux.cryptomem.CryptoMem'})
+                         {'windows.cryptomem.CryptoMem', 'linux.cryptomem.CryptoMem', 'mac.cryptomem.CryptoMem'})
         self.assertTrue(set(before['names']) <= set(after['names']))
         self.assertEqual(set(before['failures']), set(after['failures']))
         self.assertIn('windows.pslist.PsList', after['names'])
         self.assertIn('linux.pslist.PsList', after['names'])
+        self.assertIn('mac.pslist.PsList', after['names'])
 
     def test_cli_help_and_corrupt_input_do_not_need_mcp(self):
-        for os_name in ('windows', 'linux'):
+        for os_name in ('windows', 'linux', 'mac'):
             with self.subTest(os=os_name):
                 self.check_cli(os_name)
 

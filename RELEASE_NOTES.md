@@ -1,3 +1,27 @@
+# CryptoMem 0.4.0 (prerelease)
+
+Adds experimental `mac.cryptomem.CryptoMem` for legacy Intel64 macOS memory
+captures with exact matching Darwin kernel symbols. Reuses the bounded scanner
+and BTC, Ethereum, XRP and Monero validators; no dependencies or network calls.
+Windows and Linux commands, options and output schemas remain unchanged.
+
+Selects one BSD PID through the Mac tasks queue, creates one process layer, and
+scans exclusive-ended VM mappings. It rejects kernel_task/PID zero, missing maps,
+unreadable data, silent map truncation, inconsistent entry counts, overlapping
+ranges and exhausted limits. Nested submaps are explicitly unsupported, including
+shared-region submaps in ordinary processes; these scans fail as incomplete.
+
+The existing legacy Mac symbol pack may be reused when the captured kernel
+matches. This does not imply every table or macOS build has been tested. Intel32,
+Apple silicon/ARM64, and modern macOS support are not added. Upstream macOS support
+is no longer actively maintained. Real-memory macOS and Linux validation remain
+outstanding; see VALIDATION.md. Address occurrence is not wallet ownership.
+
+Install the complete `plugins` tree. MCP must pin this revision in its inventory;
+Workbench needs a backend pin update and repackage to embed that newer inventory.
+
+---
+
 # CryptoMem 0.3.0 (prerelease)
 
 Adds Linux x86-64 process memory-image analysis via `linux.cryptomem.CryptoMem`.
