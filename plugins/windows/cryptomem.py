@@ -20,7 +20,7 @@ class CryptoMem(interfaces.plugins.PluginInterface):
     """
 
     _required_framework_version = (2, 28, 0)
-    _version = (0, 4, 0)
+    _version = (0, 5, 0)
     CHUNK_BYTES = 65536
     MAX_SCAN_BYTES = 268435456
     MAX_RESULTS = 10000

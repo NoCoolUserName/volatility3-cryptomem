@@ -145,3 +145,23 @@ Before making real-memory accuracy or wallet-product support claims:
 
 No live blockchain query, recovered-code execution, evidence upload, or private
 key/seed recovery is needed for this validation.
+# 0.5.0 opt-in formats
+
+Local checks: 101 synthetic tests under Python 3.12.13 and 3.14.6,
+Volatility 3 2.28.2, PyCryptodome 3.23.0, pefile 2024.8.26. These include the
+unchanged Windows address regression suite, Linux TGID and Mac-map restrictions,
+public BIP-39 zero-entropy/BIP-32 vector 1, generated WIF payloads, all mnemonic
+lengths, checksum/structure/scalar failures, NFKD/whitespace and exact source spans.
+All three adapters exercise ASCII/wide candidates across ordinary reads,
+separate mappings, unreadable gaps, limits and empty output. JSON, CSV, quick and
+pretty renderers stay masked; interruption, untrusted exceptions and payment
+message secrets are covered. Extraction uses the actual Volatility CLI private
+file handler and fails closed for an unsupported handler. No private evidence is
+read or uploaded. Ruff's repository CI selection passes locally.
+
+These checks do not establish real-memory accuracy, wallet ownership or use,
+captured-kernel compatibility, encrypted-wallet recovery, or transaction validity.
+Real-memory Linux and macOS checks with suitably licensed captures and exactly
+matching symbols remain outstanding. Local test environments are isolated from
+the active analyzer and its ongoing offline Linux symbol index.
+
