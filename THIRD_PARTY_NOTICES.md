@@ -1,7 +1,6 @@
 # Attribution and scope
 
-CryptoMem is an independently maintained implementation by NoCoolUserName,
-published under the Volatility Software License 1.0. The source for each release
+CryptoMem is an independently maintained implementation published under the Volatility Software License 1.0. The source for each release
 is available at https://github.com/NoCoolUserName/volatility3-cryptomem.
 
 ## CryptoScan reference
