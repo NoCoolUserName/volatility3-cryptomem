@@ -1,7 +1,7 @@
 # CryptoMem
 
 An independently maintained, offline cryptocurrency artifact scanner for
-Volatility 3 by [NoCoolUserName](https://github.com/NoCoolUserName).
+Volatility 3.
 Inspired by CryptoScan's detection ideas, with a new bounded scanner, address
 validation, process/virtual-address provenance, and explicit scan coverage.
 No MCP, Workbench, AI service, wallet application, or blockchain API is required.
