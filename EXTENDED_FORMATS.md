@@ -1,7 +1,6 @@
 # Opt-in formats and artifact contract (0.5.0)
 
-`--detect-mnemonics`, `--detect-private-keys`, and `--detect-txids` independently
-enable new text detectors in the existing single-process scanner. All default to
+`--detect-mnemonics`, `--detect-private-keys`, and `--detect-txids` independently enable text detectors in the existing single-process scanner. All default to
 false. Address-only execution retains schema 1, filenames, columns and currency
 selection. It suppresses recognizable secrets embedded in payment-request text.
 No additional framework, MCP tool, network client, report, or runtime dependency
