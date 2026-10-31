@@ -2,8 +2,8 @@
 
 An independently maintained, offline cryptocurrency artifact scanner for
 Volatility 3.
-Inspired by CryptoScan's detection ideas, with a new bounded scanner, address
-validation, process/virtual-address provenance, and explicit scan coverage.
+Inspired by CryptoScan, it validates address candidates, records process IDs and
+virtual addresses, and reports how much memory was scanned.
 No MCP, Workbench, AI service, wallet application, or blockchain API is required.
 
 ## Supported scope
@@ -25,7 +25,7 @@ No MCP, Workbench, AI service, wallet application, or blockchain API is required
 - Opt-in Bitcoin WIF and BIP-32 xprv/tprv serialized private-key candidates.
 - Opt-in hexadecimal transaction-ID candidates with confidence and ambiguity.
 
-This is text-format detection, not a wallet-format support matrix. An address
+The scanner recognizes text formats; it does not parse wallet files. An address
 in a browser, document, clipboard, or other process does not establish wallet
 installation, ownership, control, balance, or a transaction. An Ethereum-style
 address does not identify an EVM network. A payment request is not payment evidence.
@@ -100,7 +100,7 @@ use the same plugin.
 | `--detect-txids` | Opt in to ambiguous 64-hex candidates, optionally prefixed `0x`. |
 | `--extract-secrets` | Explicitly save full detected secrets through a private POSIX output handler; requires a secret detector. |
 
-All new flags default to false. `--currency` continues to select address families;
+All opt-in detector and extraction flags default to false. `--currency` continues to select address families;
 it does not select mnemonic/key/transaction detectors. The existing Windows,
 Linux and Mac command names, defaults and renderer columns are preserved.
 
